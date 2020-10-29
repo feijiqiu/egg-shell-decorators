@@ -27,12 +27,13 @@ const EggShell = app => {
     const rootPath = 'controller/';
     prefix = prefix || fullPath.substring(fullPath.indexOf(rootPath) + rootPath.length);
     prefix = prefix.startsWith('/') ? prefix : '/' + prefix;
-
+    
     for (const pName of propertyNames) {
       // 解析函数元数据
       const { reqMethod, path, middlewares } = methodHandler.getMetada(c[pName]);
-
-      const routerCb = async ctx => {
+      // 只将有带有注解方法才构建对应的 路由处理 routerCb
+      if(reqMethod && path){
+        const routerCb = async ctx => {
         const instance = new c.constructor(ctx);
         try {
           await instance[pName](ctx);
@@ -41,6 +42,7 @@ const EggShell = app => {
         }
       };
       router[reqMethod](prefix + path, ...middlewares, routerCb);
+      } 
     }
   }
 };
